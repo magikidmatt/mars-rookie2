@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mission to Mars: Perseverance & Ingenuity | PreK-1</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap');
+
+    :root {
+      --mars-red: #E27D5C;
+      --mars-dark: #C44536;
+      --space-blue: #1A1A2E;
+      --rocket-orange: #FF8C42;
+      --star-gold: #FFD166;
+      --dust-tan: #DDA15E;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Nunito', 'Comic Sans MS', 'Fredoka', sans-serif;
+      background: var(--space-blue);
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, .phase-title {
+      font-family: 'Fredoka', 'Comic Sans MS', sans-serif;
+    }
+
+    /* Progress Bar */
+    #progress-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(26, 26, 46, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 10px 16px 14px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      transition: transform 0.3s ease;
+    }
+    #progress-bar-track {
+      background: rgba(255,255,255,0.12);
+      height: 18px;
+      border-radius: 9px;
+      overflow: hidden;
+      position: relative;
+    }
+    #progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--mars-red), var(--rocket-orange), var(--star-gold));
+      border-radius: 9px;
+      width: 0%;
+      transition: width 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      position: relative;
+    }
+    #progress-bar-fill::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+      animation: shimmer 2s infinite;
+    }
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .mission-badge-mini {
+      background: linear-gradient(135deg, var(--mars-red), var(--rocket-orange));
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+    .phase-dots {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+      justify-content: center;
+    }
+    .phase-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      transition: all 0.4s ease;
+      flex-shrink: 0;
+    }
+    .phase-dot.active {
+      background: var(--star-gold);
+      box-shadow: 0 0 8px var(--star-gold);
+      transform: scale(1.3);
+    }
+
+    /* Phase Cards */
+    .phase-section {
+      min-height: 100vh;
+      padding: 80px 20px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    .phase-card {
+      width: 100%;
+      max-width: 720px;
+      background: linear-gradient(160deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 28px;
+      padding: 32px 24px;
+      backdrop-filter: blur(8px);
+      position: relative;
+      overflow: hidden;
+    }
+    .phase-card::before {
+      content: '';
+      position: absolute;
+      top: -2px; left: -2px; right: -2px; bottom: -2px;
+      background: linear-gradient(135deg, var(--mars-red), transparent 40%, transparent 60%, var(--rocket-orange));
+      border-radius: 30px;
+      z-index: -1;
+      opacity: 0.5;
+    }
+    .phase-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      font-family: 'Fredoka', sans-serif;
+      font-weight: 800;
+      font-size: 22px;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      margin-bottom: 12px;
+    }
+    .phase-title {
+      font-size: 26px;
+      font-weight: 800;
+      margin-bottom: 4px;
+      line-height: 1.2;
+    }
+    .phase-time {
+      font-size: 14px;
+      opacity: 0.7;
+      font-weight: 600;
+      margin-bottom: 20px;
+      display: inline-block;
+      background: rgba(255,255,255,0.08);
+      padding: 4px 14px;
+      border-radius: 20px;
+    }
+
+    /* Magikid Brand Bar */
+    .magikid-brand-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.08);
+      border: 2px solid rgba(255,255,255,0.12);
+      border-radius: 18px;
+      padding: 10px 22px;
+      margin-bottom: 28px;
+      backdrop-filter: blur(6px);
+    }
+    .magikid-logo-icon {
+      font-size: 32px;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    }
+    .magikid-logo-text {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #FFD166 0%, #E27D5C 50%, #FF8C42 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 0.5px;
+    }
+    .magikid-logo-tagline {
+      font-size: 11px;
+      font-weight: 600;
+      opacity: 0.6;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* Magikid Footer */
+    .magikid-footer {
+      text-align: center;
+      padding: 40px 20px 60px;
+      position: relative;
+    }
+    .magikid-footer-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .magikid-footer-icon {
+      font-size: 42px;
+    }
+    .magikid-footer-name {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--star-gold);
+    }
+    .magikid-footer-divider {
+      width: 80px;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--mars-red), transparent);
+      margin: 0 auto 16px;
+      border-radius: 2px;
+    }
+    .magikid-footer-text {
+      font-size: 14px;
+      opacity: 0.5;
+      line-height: 1.6;
+    }
+
+    /* Hero */
+    .hero-section {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 60px 20px 40px;
+      position: relative;
+      overflow: hidden;
+      background: radial-gradient(ellipse at 50% 30%, rgba(226, 125, 92, 0.15) 0%, transparent 70%);
+    }
+    .hero-stars {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .star-particle {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle 2s infinite alternate;
+    }
+    @keyframes twinkle {
+      0% { opacity: 0.2; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1.2); }
+    }
+    .hero-icon {
+      font-size: 90px;
+      margin-bottom: 16px;
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+    .hero-title {
+      font-family: 'Fredoka', sans-serif;
+      font-size: clamp(32px, 7vw, 48px);
+      font-weight: 800;
+      line-height: 1.15;
+      background: linear-gradient(135deg, #fff 0%, var(--star-gold) 50%, var(--mars-red) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 12px;
+    }
+    .hero-sub {
+      font-size: clamp(16px, 3.5vw, 20px);
+      opacity: 0.85;
+      max-width: 500px;
+      margin: 0 auto 24px;
+      line-height: 1.5;
+    }
+    .hero-badge-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .hero-badge {
+      background: linear-gradient(135deg, var(--mars-red), var(--mars-dark));
+      padding: 10px 20px;
+      border-radius: 16px;
+      font-weight: 700;
+      font-size: 15px;
+      box-shadow: 0 4px 15px rgba(226, 125, 92, 0.35);
+    }
+
+    /* Alert Box (Hook) */
+    .alert-box {
+      background: linear-gradient(135deg, rgba(255,140,66,0.2), rgba(226,125,92,0.15));
+      border: 3px dashed var(--rocket-orange);
+      border-radius: 22px;
+      padding: 24px 20px;
+      text-align: center;
+      position: relative;
+      animation: pulse-border 2s ease-in-out infinite;
+    }
+    @keyframes pulse-border {
+      0%, 100% { border-color: var(--rocket-orange); box-shadow: 0 0 0 0 rgba(255,140,66,0.2); }
+      50% { border-color: var(--star-gold); box-shadow: 0 0 20px 5px rgba(255,209,102,0.15); }
+    }
+    .alert-icon {
+      font-size: 48px;
+      margin-bottom: 10px;
+      animation: shake 0.6s ease-in-out infinite alternate;
+    }
+    @keyframes shake {
+      0% { transform: rotate(-5deg); }
+      100% { transform: rotate(5deg); }
+    }
+    .alert-title {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--star-gold);
+      margin-bottom: 8px;
+    }
+    .alert-text {
+      font-size: 17px;
+      line-height: 1.55;
+      color: rgba(255,255,255,0.92);
+    }
+    .alert-question {
+      margin-top: 16px;
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--rocket-orange);
+    }
+
+    /* Visual - Mars Scene */
+    .mars-scene {
+      background: linear-gradient(180deg, #1a0a05 0%, #c44536 40%, #e27d5c 65%, #dda15e 85%, #8B5A2B 100%);
+      border-radius: 24px;
+      padding: 32px 20px;
+      margin-top: 16px;
+      position: relative;
+      overflow: hidden;
+      min-height: 320px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .mars-sky {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 45%;
+      background: radial-gradient(circle at 70% 20%, rgba(200,80,60,0.4), transparent 60%);
+    }
+    .sun-glow {
+      position: absolute;
+      top: 16px;
+      right: 24px;
+      width: 56px;
+      height: 56px;
+      background: radial-gradient(circle, #FFD166 0%, rgba(255,209,102,0.3) 40%, transparent 70%);
+      border-radius: 50%;
+      animation: sunPulse 4s ease-in-out infinite;
+    }
+    @keyframes sunPulse {
+      0%, 100% { transform: scale(1); opacity: 0.9; }
+      50% { transform: scale(1.08); opacity: 1; }
+    }
+    .rover-svg-container {
+      position: relative;
+      z-index: 2;
+      margin-top: 20px;
+      filter: drop-shadow(0 8px 16px rgba(0,0,0,0.4));
+    }
+    .heli-sprite {
+      position: absolute;
+      top: 20px;
+      right: 18%;
+      z-index: 3;
+      font-size: 42px;
+      animation: heliHover 3s ease-in-out infinite;
+    }
+    @keyframes heliHover {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      25% { transform: translateY(-10px) rotate(2deg); }
+      75% { transform: translateY(-4px) rotate(-2deg); }
+    }
+    .mars-ground {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 55%;
+      border-radius: 0 0 24px 24px;
+    }
+    .rock {
+      position: absolute;
+      bottom: 10%;
+      border-radius: 50% 50% 45% 45%;
+      background: linear-gradient(135deg, #8B6914, #6B4912);
+    }
+    .visual-caption {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 16px;
+      line-height: 1.6;
+      position: relative;
+      z-index: 4;
+    }
+    .fun-fact-bubble {
+      background: rgba(0,0,0,0.35);
+      border-left: 4px solid var(--star-gold);
+      border-radius: 14px;
+      padding: 14px 18px;
+      margin-top: 14px;
+      font-size: 15px;
+      line-height: 1.5;
+      z-index: 4;
+      position: relative;
+    }
+
+    /* Prep Checklist */
+    .checklist-container {
+      margin-top: 12px;
+    }
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 16px 18px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+    .check-item:hover {
+      background: rgba(255,255,255,0.09);
+      border-color: rgba(255,255,255,0.15);
+    }
+    .check-item.checked {
+      background: rgba(76,175,80,0.12);
+      border-color: rgba(76,175,80,0.4);
+    }
+    .check-box {
+      width: 38px;
+      height: 38px;
+      min-width: 38px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      transition: all 0.3s ease;
+      background: rgba(255,255,255,0.06);
+    }
+    .check-item.checked .check-box {
+      background: #4CAF50;
+      border-color: #4CAF50;
+      animation: checkPop 0.4s ease;
+    }
+    @keyframes checkPop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+    .check-label {
+      font-size: 17px;
+      font-weight: 700;
+      flex: 1;
+    }
+    .check-item.checked .check-label {
+      text-decoration: line-through;
+      opacity: 0.7;
+    }
+    .check-emoji {
+      font-size: 28px;
+    }
+    .gear-up-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--star-gold);
+    }
+
+    /* Action - The Assembler (Rover Build) */
+    .action-intro {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 17px;
+      line-height: 1.55;
+    }
+    .parts-rack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 20px;
+      padding: 16px;
+      background: rgba(0,0,0,0.25);
+      border-radius: 18px;
+      border: 2px dashed rgba(255,255,255,0.12);
+    }
+    .rover-part {
+      width: 82px;
+      height: 82px;
+      background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.04));
+      border: 2px solid rgba(255,255,255,0.18);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      transition: all 0.3s ease;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+      position: relative;
+    }
+    .rover-part:active {
+      cursor: grabbing;
+      transform: scale(1.08);
+      border-color: var(--mars-red);
+      box-shadow: 0 0 16px rgba(226,125,92,0.35);
+    }
+    .rover-part.placed {
+      opacity: 0.35;
+      pointer-events: none;
+      border-color: rgba(76,175,80,0.5);
+      background: rgba(76,175,80,0.08);
+    }
+    .part-emoji { font-size: 34px; }
+    .part-name { font-size: 11px; font-weight: 700; margin-top: 4px; opacity: 0.8; }
+    
+    .build-zone {
+      background: linear-gradient(180deg, rgba(139,90,43,0.2) 0%, rgba(139,90,43,0.08) 100%);
+      border: 3px dashed rgba(221,161,94,0.35);
+      border-radius: 24px;
+      padding: 28px 20px;
+      min-height: 260px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin-top: 12px;
+    }
+    .build-zone-title {
+      font-size: 15px;
+      font-weight: 700;
+      opacity: 0.6;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .ghost-rover {
+      display: grid;
+      grid-template-columns: repeat(3, 72px);
+      grid-template-rows: repeat(3, 68px);
+      gap: 6px;
+      position: relative;
+    }
+    .drop-slot {
+      width: 72px;
+      height: 68px;
+      border: 2px dashed rgba(255,255,255,0.15);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.03);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    .drop-slot.filled {
+      border-style: solid;
+      border-color: rgba(76,175,80,0.5);
+      background: rgba(76,175,80,0.08);
+      animation: slotGlow 1.5s ease infinite alternate;
+    }
+    @keyframes slotGlow {
+      0% { box-shadow: 0 0 8px rgba(76,175,80,0.15); }
+      100% { box-shadow: 0 0 18px rgba(76,175,80,0.3); }
+    }
+    .slot-hint {
+      font-size: 10px;
+      opacity: 0.35;
+      text-align: center;
+      font-weight: 600;
+    }
+    .placed-part {
+      font-size: 38px;
+      animation: partLand 0.5s ease;
+    }
+    @keyframes partLand {
+      0% { transform: scale(1.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .build-progress-text {
+      margin-top: 16px;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--star-gold);
+    }
+    .build-complete-msg {
+      display: none;
+      text-align: center;
+      margin-top: 16px;
+      animation: celebrateIn 0.6s ease;
+    }
+    .build-complete-msg.show {
+      display: block;
+    }
+    @keyframes celebrateIn {
+      0% { transform: scaleY(0); opacity: 0; }
+      100% { transform: scaleY(1); opacity: 1; }
+    }
+    .celebrate-emoji {
+      font-size: 44px;
+      display: block;
+      margin-bottom: 8px;
+      animation: bounce 0.6s ease infinite alternate;
+    }
+    @keyframes bounce {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-8px); }
+    }
+
+    /* Logic Section */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .compare-card {
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 20px 16px;
+      text-align: center;
+    }
+    .compare-shape {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 52px;
+    }
+    .shape-teardrop { 
+      background: linear-gradient(180deg, #4CAF50, #2E7D32); 
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; 
+    }
+    .shape-square { 
+      background: linear-gradient(180deg, #f44336, #c62828); 
+      border-radius: 8px; 
+    }
+    .compare-title {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+    .compare-desc {
+      font-size: 14px;
+      opacity: 0.8;
+      line-height: 1.5;
+    }
+    .vs-divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Fredoka', sans-serif;
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--star-gold);
+      padding: 8px 0;
+    }
+    .logic-verdict {
+      background: linear-gradient(135deg, rgba(76,175,80,0.15), rgba(33,150,243,0.1));
+      border: 2px solid rgba(76,175,80,0.3);
+      border-radius: 18px;
+      padding: 18px;
+      margin-top: 16px;
+      text-align: center;
+      font-size: 16px;
+      line-height: 1.55;
+    }
+    .verdict-star { font-size: 24px; margin-right: 6px; }
+
+    /* Reward / Level Up */
+    .reward-screen {
+      text-align: center;
+      padding: 20px;
+    }
+    .badge-container {
+      position: relative;
+      width: 180px;
+      height: 180px;
+      margin: 0 auto 24px;
+    }
+    .badge-ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: conic-gradient(var(--mars-red), var(--rocket-orange), var(--star-gold), var(--mars-red));
+      animation: badgeSpin 4s linear infinite;
+      padding: 6px;
+    }
+    @keyframes badgeSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .badge-inner {
+      width: 100%;
+      height: 100%;
+      background: var(--space-blue);
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+    }
+    .badge-label {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--star-gold);
+      margin-top: 4px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .level-up-title {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 32px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--star-gold), var(--rocket-orange));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+    .level-up-sub {
+      font-size: 18px;
+      opacity: 0.85;
+      margin-bottom: 24px;
+    }
+    .achievement-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 400px;
+      margin: 0 auto 28px;
+    }
+    .achievement-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .achievement-check {
+      font-size: 22px;
+    }
+    .sound-btn {
+      background: linear-gradient(135deg, var(--mars-red), var(--rocket-orange));
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 16px 32px;
+      font-family: 'Fredoka', 'Comic Sans MS', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 24px rgba(226,125,92,0.4);
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+      position: relative;
+      overflow: hidden;
+    }
+    .sound-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(226,125,92,0.5);
+    }
+    .sound-btn:active {
+      transform: translateY(0);
+    }
+    .sound-btn.playing {
+      animation: btnPulse 0.5s ease infinite alternate;
+    }
+    @keyframes btnPulse {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.05); }
+    }
+    .sound-hint {
+      font-size: 12px;
+      opacity: 0.5;
+      margin-top: 8px;
+    }
+    /* Confetti */
+    .confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    /* Scroll animations */
+    .fade-in-up {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-in-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Responsive tweaks for iPad */
+    @media (min-width: 768px) {
+      .phase-card { padding: 40px 36px; }
+      .phase-title { font-size: 30px; }
+      .rover-part { width: 96px; height: 96px; }
+      .part-emoji { font-size: 40px; }
+      .drop-slot { width: 84px; height: 78px; }
+      .placed-part { font-size: 44px; }
+      .ghost-rover { gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== PROGRESS BAR ===== -->
+<div id="progress-container">
+  <div class="progress-label">
+    <span>🚀 Instructional Roadmap</span>
+    <span class="mission-badge-mini" id="progress-percent">0%</span>
+  </div>
+  <div id="progress-bar-track">
+    <div id="progress-bar-fill"></div>
+  </div>
+  <div class="phase-dots" id="phase-dots">
+    <div class="phase-dot active" data-phase="0"></div>
+    <div class="phase-dot" data-phase="1"></div>
+    <div class="phase-dot" data-phase="2"></div>
+    <div class="phase-dot" data-phase="3"></div>
+    <div class="phase-dot" data-phase="4"></div>
+    <div class="phase-dot" data-phase="5"></div>
+  </div>
+</div>
+
+<!-- ===== HERO SECTION ===== -->
+<section class="hero-section" id="section-hero">
+  <div class="hero-stars" id="hero-stars"></div>
+
+  <!-- Magikid Brand Bar -->
+  <div class="magikid-brand-bar">
+    <img src="../Assets/magikidlogo.png" alt="Magikid Logo" class="magikid-logo-icon" style="width:44px; height:44px; border-radius:12px; object-fit:contain;">
+    <div>
+      <div class="magikid-logo-text">Magikid</div>
+      <div class="magikid-logo-tagline">AI Robotics Lab</div>
+    </div>
+  </div>
+
+  <div class="hero-icon">🔴🛸</div>
+  <h1 class="hero-title">Perseverance & Ingenuity<br><span style="font-size:0.65em">Instructional Roadmap</span></h1>
+  <p class="hero-sub">Pre-K to Grade 1 · Ages 4–7 · 30 Minutes<br>A Magikid AI Robotics Lab Adventure</p>
+  <div class="hero-badge-row">
+    <span class="hero-badge">🤖 Robot Rover</span>
+    <span class="hero-badge">🚁 Helicopter</span>
+    <span class="hero-badge">🔴 The Red Planet</span>
+  </div>
+  <div style="margin-top: 32px; font-size: 40px; animation: float 2.5s ease-in-out infinite;">👇</div>
+  <p style="opacity: 0.5; margin-top: 8px; font-size: 13px;">Scroll to start mission!</p>
+</section>
+
+<!-- ===== PHASE 1: HOOK (3 mins) ===== -->
+<section class="phase-section" id="section-hook">
+  <div class="phase-card fade-in-up">
+    <div class="phase-number" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">1</div>
+    <h2 class="phase-title" style="color: #ff6b6b;">The Cold Case Mystery 🔍</h2>
+    <span class="phase-time">⏱️ 3 Minutes — Hook</span>
+
+    <div class="alert-box">
+      <div class="alert-icon">❄️🔴❓</div>
+      <div class="alert-title">MISSION ALERT! MISSION ALERT!</div>
+      <div class="alert-text">
+        Mars is called <strong style="color:#FFD166">the Red Planet</strong>, but did you know…<br><br>
+        It is <strong>FREEZING COLD!</strong> 🥶<br>
+        Even colder than the South Pole! ❄️❄️❄️
+      </div>
+      <div class="alert-question">
+        🤔 How can our robot survive on Mars?<br>
+        <span style="font-size: 16px; opacity: 0.8; font-weight: 600;">Let's find out together!</span>
+      </div>
+    </div>
+
+
+  </div>
+</section>
+
+<!-- ===== PHASE 2: VISUAL (5 mins) ===== -->
+<section class="phase-section" id="section-visual">
+  <div class="phase-card fade-in-up">
+    <div class="phase-number" style="background: linear-gradient(135deg, #3498db, #2980b9);">2</div>
+    <h2 class="phase-title" style="color: #74b9ff;">See Mars Up Close! 🔭</h2>
+    <span class="phase-time">⏱️ 5 Minutes — Visual</span>
+
+    <div class="mars-scene">
+      <!-- Real Perseverance Selfie -->
+      <img src="perseverance-selfie.gif" alt="Perseverance Rover selfie on Mars" style="
+        width: 100%; height: auto;
+        border-radius: 24px;
+        object-fit: cover;
+        min-height: 280px;
+        filter: drop-shadow(0 8px 16px rgba(0,0,0,0.4));
+      ">
+    </div>
+
+    <div class="visual-caption">
+      <strong>This is a REAL photo!</strong> 📸 Perseverance took this selfie on Mars!<br>
+      Can you spot tiny <strong style="color:var(--rocket-orange)">Ingenuity</strong> the helicopter? 🚁<br>
+      <span style="font-size: 14px; opacity: 0.65;">(Hint: look behind the rover on the left! 👈)</span>
+    </div>
+
+    <div class="fun-fact-bubble">
+      <strong style="color:var(--star-gold)">🧠 Fun Fact:</strong> 
+      Ingenuity was the <strong>first ever helicopter</strong> to fly on another planet! 
+      The air on Mars is so thin, it's like flying at 100,000 feet above Earth!
+    </div>
+
+
+  </div>
+</section>
+
+<!-- ===== PHASE 3: PREP (2 mins) ===== -->
+<section class="phase-section" id="section-prep">
+  <div class="phase-card fade-in-up">
+    <div class="phase-number" style="background: linear-gradient(135deg, #f39c12, #e67e22);">3</div>
+    <h2 class="phase-title" style="color: #fdcb6e;">Gear Up! 🛠️</h2>
+    <span class="phase-time">⏱️ 2 Minutes — Prep</span>
+
+    <p style="font-size: 16px; margin-bottom: 12px; line-height: 1.55; text-align: center;">
+      Before we launch our mission, let's check our gear!<br>
+      <strong style="color: var(--star-gold)">Tap each item to check it off!</strong>
+    </p>
+
+    <div class="gear-up-header">📋 Mission Checklist:</div>
+    <div class="checklist-container" id="prep-checklist">
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box">✓</div>
+        <span class="check-label">My curious brain is ON!</span>
+        <span class="check-emoji">🧠</span>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box">✓</div>
+        <span class="check-label">I can see the screen</span>
+        <span class="check-emoji">👀</span>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box">✓</div>
+        <span class="check-label">I'm ready to be a Space Detective</span>
+        <span class="check-emoji">🕵️</span>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box">✓</div>
+        <span class="check-label">I will try my best!</span>
+        <span class="check-emoji">💪</span>
+      </div>
+    </div>
+
+    <div id="prep-complete" style="display:none; text-align:center; margin-top:16px; animation: celebrateIn 0.5s ease;">
+      <div style="font-size: 36px;">🚀</div>
+      <div style="font-size: 18px; font-weight: 800; color: #4CAF50;">All Systems Go! Ready for Launch!</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PHASE 4: ACTION (10 mins) ===== -->
+<section class="phase-section" id="section-action">
+  <div class="phase-card fade-in-up">
+    <div class="phase-number" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">4</div>
+    <h2 class="phase-title" style="color: #a29bfe;">Build the Mars Rover! 🔧</h2>
+    <span class="phase-time">⏱️ 10 Minutes — Action · The Assembler</span>
+
+    <div class="action-intro">
+      <strong>Mission Control needs YOU!</strong> 👨‍🚀<br>
+      Tap each part below to snap it onto the rover blueprint.<br>
+      Can you build the complete robot? 🤖
+    </div>
+
+    <!-- Parts Rack -->
+    <div class="parts-rack" id="parts-rack">
+      <div class="rover-part" data-part="body" onclick="placePart(this)">
+        <span class="part-emoji">📦</span>
+        <span class="part-name">Body</span>
+      </div>
+      <div class="rover-part" data-part="wheels" onclick="placePart(this)">
+        <span class="part-emoji">🛞</span>
+        <span class="part-name">Wheels</span>
+      </div>
+      <div class="rover-part" data-part="camera" onclick="placePart(this)">
+        <span class="part-emoji">👁️</span>
+        <span class="part-name">Camera</span>
+      </div>
+      <div class="rover-part" data-part="arm" onclick="placePart(this)">
+        <span class="part-emoji">🦾</span>
+        <span class="part-name">Robot Arm</span>
+      </div>
+      <div class="rover-part" data-part="power" onclick="placePart(this)">
+        <span class="part-emoji">🔋</span>
+        <span class="part-name">Power</span>
+      </div>
+      <div class="rover-part" data-part="antenna" onclick="placePart(this)">
+        <span class="part-emoji">📡</span>
+        <span class="part-name">Antenna</span>
+      </div>
+    </div>
+
+    <!-- Build Zone -->
+    <div class="build-zone">
+      <div class="build-zone-title">🔲 Rover Blueprint</div>
+      <div class="ghost-rover">
+        <div class="drop-slot" data-slot="antenna"><span class="slot-hint">Antenna</span></div>
+        <div class="drop-slot" data-slot="camera"><span class="slot-hint">Camera</span></div>
+        <div class="drop-slot" data-slot="empty"><span class="slot-hint">—</span></div>
+        
+        <div class="drop-slot" data-slot="empty"><span class="slot-hint">—</span></div>
+        <div class="drop-slot" data-slot="body"><span class="slot-hint">Body</span></div>
+        <div class="drop-slot" data-slot="arm"><span class="slot-hint">Arm</span></div>
+        
+        <div class="drop-slot" data-slot="empty"><span class="slot-hint">—</span></div>
+        <div class="drop-slot" data-slot="wheels"><span class="slot-hint">Wheels ×3</span></div>
+        <div class="drop-slot" data-slot="power"><span class="slot-hint">Power</span></div>
+      </div>
+      <div class="build-progress-text" id="build-progress">Parts placed: <span id="parts-count">0</span> / 6</div>
+      
+      <div class="build-complete-msg" id="build-complete">
+        <span class="celebrate-emoji">🎉🚀🎉</span>
+        <div style="font-family:'Fredoka',sans-serif; font-size:22px; font-weight:800; color:#4CAF50;">
+          ROVER COMPLETE!
+        </div>
+        <div style="font-size: 15px; opacity: 0.85; margin-top: 6px;">
+          You built Perseverance! Now it can explore Mars! 🤖🔴
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+</section>
+
+<!-- ===== PHASE 5: LOGIC (5 mins) ===== -->
+<section class="phase-section" id="section-logic">
+  <div class="phase-card fade-in-up">
+    <div class="phase-number" style="background: linear-gradient(135deg, #1abc9c, #16a085);">5</div>
+    <h2 class="phase-title" style="color: #55efc4;">The Shape Secret 🧊</h2>
+    <span class="phase-time">⏱️ 5 Minutes — Logic</span>
+
+    <p style="font-size: 16px; text-align: center; margin-bottom: 16px; line-height: 1.55;">
+      Why is Perseverance shaped like a <strong style="color:var(--star-gold)">box</strong>,<br>
+      but Ingenuity the helicopter has a different shape? 🚁
+    </p>
+
+    <div class="comparison-grid">
+      <div class="compare-card">
+        <div class="compare-shape" style="background: linear-gradient(180deg, #3498db, #1a5276); border-radius: 50% 50% 45% 45% / 55% 55% 45% 45%;">🚁</div>
+        <div class="compare-title" style="color: #74b9ff;">Light &amp; Skinny</div>
+        <div class="compare-desc">
+          Ingenuity is tiny — only 4 lbs!<br>
+          It needs to be light to FLY<br>
+          <strong>Helicopters love this!</strong> 🪶
+        </div>
+      </div>
+      <div class="compare-card">
+        <div class="compare-shape shape-square">📦</div>
+        <div class="compare-title" style="color: #e74c3c;">Big Box Shape</div>
+        <div class="compare-desc">
+          Perseverance is car-sized!<br>
+          Holds cameras, drills, &amp; arms<br>
+          <strong>Rovers need this!</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="vs-divider">VS</div>
+
+    <div class="logic-verdict">
+      <span class="verdict-star">⭐</span>
+      <strong>The Big Idea:</strong> Different jobs need different shapes!<br><br>
+      🚁 <strong>Ingenuity = Light &amp; Small</strong> → Flies in thin air<br>
+      🤖 <strong>Perseverance = Big Box</strong> → Carries tools on the ground<br><br>
+      Both shapes are <strong style="color:var(--star-gold)">PERFECT</strong> for their mission!
+    </div>
+
+  </div>
+</section>
+
+<!-- ===== PHASE 6: REWARD (5 mins) ===== -->
+<section class="phase-section" id="section-reward">
+  <div class="phase-card fade-in-up reward-screen">
+    <div class="phase-number" style="background: linear-gradient(135deg, #FFD166, #f39c12);">6</div>
+    <h2 class="phase-title" style="color: #ffeaa7;">Level Up! 🏆</h2>
+    <span class="phase-time">⏱️ 5 Minutes — Reward</span>
+
+    <div class="badge-container">
+      <div class="badge-ring"></div>
+      <div class="badge-inner">
+        🏅
+        <span class="badge-label">Mars Rookie</span>
+      </div>
+    </div>
+
+    <div class="level-up-title">CONGRATULATIONS, ROOKIE!</div>
+    <div class="level-up-sub">You completed the Mars Mission! 🔴🚀</div>
+
+    <div class="achievement-list">
+      <div class="achievement-item">
+        <span class="achievement-check">✅</span>
+        Solved the Cold Case Mystery
+      </div>
+      <div class="achievement-item">
+        <span class="achievement-check">✅</span>
+        Saw Perseverance &amp; Ingenuity up close
+      </div>
+      <div class="achievement-item">
+        <span class="achievement-check">✅</span>
+        Built your own Mars Rover
+      </div>
+      <div class="achievement-item">
+        <span class="achievement-check">✅</span>
+        Discovered the Shape Secret
+      </div>
+    </div>
+
+    <button class="sound-btn" id="soundBtn" onclick="playMarsSound()">
+      🔊 Click for Mars Sounds!
+    </button>
+    <div class="sound-hint">(Psst… tap the button! 👆)</div>
+
+    <div style="margin-top: 24px; padding: 16px; background: rgba(255,209,102,0.08); border-radius: 16px; border: 1px solid rgba(255,209,102,0.2);">
+      <div style="font-size: 15px; font-weight: 700; color: var(--star-gold); margin-bottom: 6px;">
+        🌟 Rookie's Promise
+      </div>
+      <div style="font-size: 14px; opacity: 0.85; line-height: 1.55;">
+        "I am a <strong>Mars Rookie</strong>. I ask questions. I never give up.<br>
+        Like <em>Perseverance</em>, I keep going! Like <em>Ingenuity</em>, I try new things!"
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MAGIKID FOOTER ===== -->
+<section class="magikid-footer">
+  <div class="magikid-footer-logo">
+    <img src="../Assets/magikidlogo.png" alt="Magikid Logo" class="magikid-footer-icon" style="width:56px; height:56px; border-radius:16px; object-fit:contain;">
+    <span class="magikid-footer-name">Magikid</span>
+  </div>
+  <div class="magikid-footer-divider"></div>
+  <p class="magikid-footer-text">
+    AI Robotics Lab · Explore. Build. Learn.<br>
+    🚀 Every rookie is a star!
+  </p>
+</section>
+
+<!-- Confetti Canvas -->
+<canvas class="confetti-canvas" id="confettiCanvas"></canvas>
+
+<script>
+// ========== STARS IN HERO ==========
+(function() {
+  const container = document.getElementById('hero-stars');
+  if (!container) return;
+  for (let i = 0; i < 60; i++) {
+    const star = document.createElement('div');
+    star.className = 'star-particle';
+    star.style.left = Math.random() * 100 + '%';
+    star.style.top = Math.random() * 100 + '%';
+    const size = Math.random() * 3 + 1;
+    star.style.width = size + 'px';
+    star.style.height = size + 'px';
+    star.style.animationDelay = Math.random() * 3 + 's';
+    star.style.animationDuration = (Math.random() * 2 + 1.5) + 's';
+    container.appendChild(star);
+  }
+})();
+
+// ========== PROGRESS BAR ==========
+const sections = [
+  'section-hero',
+  'section-hook',
+  'section-visual',
+  'section-prep',
+  'section-action',
+  'section-logic',
+  'section-reward'
+];
+
+function updateProgress() {
+  const scrollTop = window.scrollY;
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const progress = docHeight > 0 ? Math.min((scrollTop / docHeight) * 100, 100) : 0;
+
+  document.getElementById('progress-bar-fill').style.width = progress + '%';
+  document.getElementById('progress-percent').textContent = Math.round(progress) + '%';
+
+  // Update phase dots
+  const phaseProgress = (progress / 100) * 6;
+  document.querySelectorAll('.phase-dot').forEach((dot, i) => {
+    dot.classList.toggle('active', i <= Math.floor(phaseProgress));
+  });
+}
+
+window.addEventListener('scroll', updateProgress);
+updateProgress();
+
+// ========== SCROLL REVEAL ==========
+const observerOptions = { threshold: 0.15 };
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, observerOptions);
+
+document.querySelectorAll('.fade-in-up').forEach(el => observer.observe(el));
+
+// ========== PREP CHECKLIST ==========
+function toggleCheck(item) {
+  item.classList.toggle('checked');
+  const checkbox = item.querySelector('.check-box');
+  if (item.classList.contains('checked')) {
+    checkbox.textContent = '✅';
+  } else {
+    checkbox.textContent = '✓';
+  }
+  
+  // Check if all checked
+  const items = document.querySelectorAll('#prep-checklist .check-item');
+  const allChecked = Array.from(items).every(i => i.classList.contains('checked'));
+  document.getElementById('prep-complete').style.display = allChecked ? 'block' : 'none';
+}
+
+// ========== ACTION: ROVER BUILD (Assembler) ==========
+let partsPlaced = 0;
+const totalParts = 6;
+
+const slotMap = {
+  'body':     '.drop-slot[data-slot="body"]',
+  'wheels':   '.drop-slot[data-slot="wheels"]',
+  'camera':   '.drop-slot[data-slot="camera"]',
+  'arm':      '.drop-slot[data-slot="arm"]',
+  'power':    '.drop-slot[data-slot="power"]',
+  'antenna':  '.drop-slot[data-slot="antenna"]'
+};
+
+const partEmojis = {
+  'body': '📦',
+  'wheels': '🛞',
+  'camera': '👁️',
+  'arm': '🦾',
+  'power': '🔋',
+  'antenna': '📡'
+};
+
+const placedParts = new Set();
+
+function placePart(partEl) {
+  const partName = partEl.dataset.part;
+  if (placedParts.has(partName)) return;
+
+  // Mark part as used
+  placedParts.add(partName);
+  partEl.classList.add('placed');
+
+  // Find target slot
+  const slotSelector = slotMap[partName];
+  const slot = document.querySelector(slotSelector);
+
+  if (slot) {
+    slot.classList.add('filled');
+    slot.innerHTML = '<span class="placed-part">' + partEmojis[partName] + '</span>';
+  }
+
+  // Update counter
+  partsPlaced++;
+  document.getElementById('parts-count').textContent = partsPlaced;
+
+  // Check completion
+  if (partsPlaced >= totalParts) {
+    document.getElementById('build-complete').classList.add('show');
+    fireConfetti();
+  }
+}
+
+// ========== SOUND BUTTON ==========
+let audioCtx = null;
+
+function playMarsSound() {
+  const btn = document.getElementById('soundBtn');
+  btn.classList.add('playing');
+
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+
+  // Play a fun ascending "spacey" arpeggio
+  const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+  const now = audioCtx.currentTime;
+
+  notes.forEach((freq, i) => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+
+    gain.gain.setValueAtTime(0.2, now + i * 0.18);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.18 + 0.4);
+
+    osc.start(now + i * 0.18);
+    osc.stop(now + i * 0.18 + 0.45);
+  });
+
+  setTimeout(() => {
+    btn.classList.remove('playing');
+  }, 1000);
+}
+
+// ========== CONFETTI ==========
+function fireConfetti() {
+  const canvas = document.getElementById('confettiCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const particles = [];
+  const colors = ['#E27D5C', '#FF8C42', '#FFD166', '#4CAF50', '#3498DB', '#9B59B6', '#ffffff'];
+
+  for (let i = 0; i < 120; i++) {
+    particles.push({
+      x: canvas.width / 2,
+      y: canvas.height / 2 + 100,
+      vx: (Math.random() - 0.5) * 14,
+      vy: (Math.random() - 1) * 14 - 4,
+      size: Math.random() * 8 + 4,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rotation: Math.random() * 360,
+      rotationSpeed: (Math.random() - 0.5) * 10,
+      life: 1,
+      decay: Math.random() * 0.012 + 0.006
+    });
+  }
+
+  function animateConfetti() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let alive = false;
+
+    particles.forEach(p => {
+      if (p.life <= 0) return;
+      alive = true;
+
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.25; // gravity
+      p.rotation += p.rotationSpeed;
+      p.life -= p.decay;
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation * Math.PI / 180);
+      ctx.globalAlpha = Math.max(0, p.life);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+      ctx.restore();
+    });
+
+    if (alive) {
+      requestAnimationFrame(animateConfetti);
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+
+  animateConfetti();
+}
+
+// ========== RESIZE HANDLER FOR CONFETTI CANVAS ==========
+window.addEventListener('resize', () => {
+  const canvas = document.getElementById('confettiCanvas');
+  if (canvas) {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+});
+
+// ========== AUTO-TRIGGER FIRST VISIBLE SECTIONS ==========
+setTimeout(() => {
+  document.querySelectorAll('.fade-in-up').forEach(el => {
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      el.classList.add('visible');
+    }
+  });
+}, 300);
+</script>
+
+</body>
+</html>
